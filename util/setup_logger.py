@@ -1,6 +1,8 @@
 import logging
 import os
+
 from pythonjsonlogger import jsonlogger
+
 
 def setup_logger():
     # Makes the log file and directory

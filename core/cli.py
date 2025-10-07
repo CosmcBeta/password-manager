@@ -1,5 +1,7 @@
 from sqlite3.dbapi2 import DatabaseError
+
 from db.database import DatabaseManager
+
 
 class CLIHandler:
     def __init__(self, db: DatabaseManager) -> None:

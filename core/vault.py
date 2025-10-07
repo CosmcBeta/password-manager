@@ -1,5 +1,6 @@
-from db.database import DatabaseManager
 from core.encryption import EncryptionManager
+from db.database import DatabaseManager
+
 
 class Vault:
     def __init__(self) -> None:

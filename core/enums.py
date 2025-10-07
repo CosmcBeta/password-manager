@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class InsertStatus(Enum):
     SUCCESS = 0
     DUBLICATE_USERNAME = 1

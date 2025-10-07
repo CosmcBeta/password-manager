@@ -1,7 +1,7 @@
-from util.setup_logger import setup_logger
-
 from core.cli import CLIHandler
 from db.database import DatabaseManager
+from util.setup_logger import setup_logger
+
 
 def main():
     setup_logger()
