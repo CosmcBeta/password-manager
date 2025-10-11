@@ -3,16 +3,18 @@ import os
 import sqlite3
 
 from core.enums import InsertStatus
-from core.models import User, VaultEntry
+from core.data_models import User, VaultEntry
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 class DatabaseManager:
-    def __init__(self) -> None:
-        exists = os.path.exists('data/vault.db')
-        self.conn: sqlite3.Connection = sqlite3.connect('data/vault.db')
+    def __init__(self, db_path: str = 'data/vault.db') -> None:
+        exists = os.path.exists(db_path) if db_path != ':memory:' else False
+
+        self.conn: sqlite3.Connection = sqlite3.connect(db_path)
         _ = self.conn.execute('PRAGMA foreign_keys = ON')
         self.cur: sqlite3.Cursor = self.conn.cursor()
+
         if not exists:
             self.create_database()
 
@@ -21,6 +23,16 @@ class DatabaseManager:
         with open('db/schema.sql', 'r') as f:
             schema = f.read()
         _ = self.cur.executescript(schema)
+        self.conn.commit()
+
+    # Clears database for test files
+    def clear_database(self):
+        _ = self.cur.execute('DELETE FROM vault_entries;')
+        _ = self.cur.execute('DELETE FROM users;')
+        self.conn.commit()
+
+        # Reset autoincrement counters
+        _ = self.cur.execute('DELETE FROM sqlite_sequence;')
         self.conn.commit()
 
     # Adds user
@@ -36,7 +48,7 @@ class DatabaseManager:
             logger.error(f'Error inserting user \'{username}\': {e}')
             self.conn.rollback()
 
-            return InsertStatus.OTHER_ERROR
+            return InsertStatus.ERROR
 
     # Adds login
     def insert_login(self, user_id: int, name: str, username: str | None, password: str) -> InsertStatus:
@@ -51,7 +63,7 @@ class DatabaseManager:
             logger.error(f'Error inserting login \'{name}\': {e}')
             self.conn.rollback()
 
-            return InsertStatus.OTHER_ERROR
+            return InsertStatus.ERROR
 
     # Returns user given username
     def get_user_from_username(self, username: str):

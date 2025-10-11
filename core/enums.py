@@ -6,3 +6,4 @@ class InsertStatus(Enum):
     DUBLICATE_USERNAME = 1
     FOREIGN_KEY_FAIL = 2
     OTHER_ERROR = 3
+    ERROR = 4

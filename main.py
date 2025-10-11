@@ -25,14 +25,11 @@ def main():
                 break
             case '3':
                 print('Have a nice day')
-                break
+                return
             case _:
                 print('Invalid choice')
 
     user_handler.run()
-
-
-
 
 
 
