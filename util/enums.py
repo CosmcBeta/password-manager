@@ -7,3 +7,7 @@ class InsertStatus(Enum):
     FOREIGN_KEY_FAIL = 2
     OTHER_ERROR = 3
     ERROR = 4
+
+class RemoveStatus(Enum):
+    SUCCESS = 0
+    ERROR = 1

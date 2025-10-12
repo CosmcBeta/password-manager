@@ -11,5 +11,5 @@ CREATE TABLE IF NOT EXISTS vault_entries (
     service_name TEXT NOT NULL,
     username TEXT,
     password_encrypted BLOB NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id)
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );

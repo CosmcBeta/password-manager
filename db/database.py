@@ -3,7 +3,7 @@ import os
 import sqlite3
 
 from core.data_models import User, VaultEntry
-from util.enums import InsertStatus
+from util.enums import InsertStatus, RemoveStatus
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -55,16 +55,16 @@ class DatabaseManager:
             return InsertStatus.ERROR
 
     # Adds login
-    def insert_login(self, user_id: int, name: str, username: str | None, password: bytes) -> InsertStatus:
+    def insert_login(self, user_id: int, service_name: str, username: str | None, password: bytes) -> InsertStatus:
         try:
             _ = self.cur.execute('INSERT INTO vault_entries (user_id, service_name, username, password_encrypted) \
-                                VALUES (?, ?, ?, ?)', (user_id, name, username, password))
+                                VALUES (?, ?, ?, ?)', (user_id, service_name, username, password))
             self.conn.commit()
-            logger.info(f'Inserted login \'{name}\' successfully')
+            logger.info(f'Inserted login \'{service_name}\' successfully')
 
             return InsertStatus.SUCCESS
         except sqlite3.IntegrityError as e:
-            logger.error(f'Error inserting login \'{name}\': {e}')
+            logger.error(f'Error inserting login \'{service_name}\': {e}')
             self.conn.rollback()
 
             return InsertStatus.ERROR
@@ -83,16 +83,31 @@ class DatabaseManager:
             logger.error(f'Error retrieving the user \'{username}\': {e}')
             return None
 
-    # Returns a list of all entries from a given name and with the given user
-    def get_logins_from_name(self, user_id: int, name: str) -> list[VaultEntry]:
+    # Returns user given user id
+    def get_user_from_user_id(self, user_id: int):
         try:
-            _ = self.cur.execute('SELECT * FROM vault_entries WHERE user_id = ? AND service_name = ?', (user_id, name))
-            logger.info(f'Retrieved all entries where name is \'{name}\'')
+            _ = self.cur.execute('SELECT * FROM users WHERE user_id = (?)', (user_id,))
+            logger.info(f'Retrieved the user \'{user_id}\' successfully')
+            row: tuple[int, str, bytes, bytes] | None = self.cur.fetchone()
+            if row:
+                return User(*row)
+            return None
+
+        except sqlite3.InterfaceError as e:
+            logger.error(f'Error retrieving the user \'{user_id}\': {e}')
+            return None
+
+
+    # Returns a list of all entries from a given name and with the given user
+    def get_logins_from_name(self, user_id: int, service_name: str) -> list[VaultEntry]:
+        try:
+            _ = self.cur.execute('SELECT * FROM vault_entries WHERE user_id = ? AND service_name = ?', (user_id, service_name))
+            logger.info(f'Retrieved all entries where name is \'{service_name}\'')
             rows: list[tuple[int, int, str, str, bytes]] = self.cur.fetchall()
             return [VaultEntry(*row) for row in rows]
 
         except sqlite3.Error as e:
-            logger.error(f'Error retrieving entries with user \'{user_id}\' and name \'{name}\': {e}')
+            logger.error(f'Error retrieving entries with user \'{user_id}\' and name \'{service_name}\': {e}')
             return []
 
     # Returns a list of all entries assigned to the user
@@ -118,3 +133,27 @@ class DatabaseManager:
             logger.error(f'Error updating username for user_id {user_id}: {e}')
             self.conn.rollback()
             return InsertStatus.ERROR
+
+    # Deletes user by user id
+    def delete_user(self, user_id: int) -> RemoveStatus:
+       try:
+           _ = self.cur.execute('DELETE FROM users WHERE id = ?', (user_id,))
+           self.conn.commit()
+           logger.info(f'Deleted user with id {user_id} and all associated vault entries')
+           return RemoveStatus.SUCCESS
+       except sqlite3.Error as e:
+           logger.error(f'Error deleting user {user_id}: {e}')
+           self.conn.rollback()
+           return RemoveStatus.ERROR
+
+    # Deletes a vault entry by id
+    def delete_login(self, entry_id: int) -> RemoveStatus:
+        try:
+            _ = self.cur.execute('DELETE FROM vault_entries WHERE id = ?', (entry_id,))
+            self.conn.commit()
+            logger.info(f'Deleted vault entry with id {entry_id}')
+            return RemoveStatus.SUCCESS
+        except sqlite3.Error as e:
+            logger.error(f'Error deleting vault entry {entry_id}: {e}')
+            self.conn.rollback()
+            return RemoveStatus.ERROR

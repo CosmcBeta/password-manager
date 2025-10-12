@@ -97,7 +97,7 @@ def test_decrypt_with_wrong_key_raises_error(encryption: EncryptionManager) -> N
     encrypted = encryption.encrypt_password(key1, password)
 
     with pytest.raises(Exception):
-        encryption.decrypt_password(key2, encrypted)
+        _ = encryption.decrypt_password(key2, encrypted)
 
 # Test encrypting an empty string
 def test_encrypt_empty_string(encryption: EncryptionManager) -> None:
