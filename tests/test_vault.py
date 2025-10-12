@@ -1,9 +1,12 @@
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
+from core.data_models import User
 from core.vault import Vault
-from core.data_models import User, VaultEntry
 from db.database import DatabaseManager
 from util.enums import InsertStatus, RemoveStatus
+
 
 # Create a temporary in-memory database for testing
 @pytest.fixture
