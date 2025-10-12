@@ -1,5 +1,15 @@
 cffi @ file:///Users/runner/miniforge3/conda-bld/cffi_1758716200698/work
+colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1733218098505/work
 cryptography @ file:///Users/runner/miniforge3/conda-bld/cryptography-split_1759320399481/work
+exceptiongroup @ file:///home/conda/feedstock_root/build_artifacts/exceptiongroup_1746947292760/work
+iniconfig @ file:///home/conda/feedstock_root/build_artifacts/iniconfig_1733223141826/work
+packaging @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_packaging_1745345660/work
+pluggy @ file:///home/conda/feedstock_root/build_artifacts/pluggy_1747339660894/work
 pycparser @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_pycparser_1733195786/work
+Pygments @ file:///home/conda/feedstock_root/build_artifacts/pygments_1750615794071/work
+pytest @ file:///home/conda/feedstock_root/build_artifacts/pytest_1757011799554/work
+python-json-logger @ file:///home/conda/feedstock_root/build_artifacts/python-json-logger_1677079630776/work
 setuptools==80.9.0
+tomli @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_tomli_1753796677/work
+typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_typing_extensions_1756220668/work
 wheel==0.45.1
