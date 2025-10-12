@@ -84,33 +84,27 @@ class DatabaseManager:
             return None
 
     # Returns a list of all entries from a given name and with the given user
-    def get_logins_from_name(self, user_id: int, name: str) -> list[VaultEntry] | list[None]:
+    def get_logins_from_name(self, user_id: int, name: str) -> list[VaultEntry]:
         try:
             _ = self.cur.execute('SELECT * FROM vault_entries WHERE user_id = ? AND service_name = ?', (user_id, name))
             logger.info(f'Retrieved all entries where name is \'{name}\'')
             rows: list[tuple[int, int, str, str, bytes]] = self.cur.fetchall()
-            if rows:
-                return [VaultEntry(*row) for row in rows]
-            else:
-                return [None]
+            return [VaultEntry(*row) for row in rows]
 
-        except sqlite3.IntegrityError as e:
+        except sqlite3.Error as e:
             logger.error(f'Error retrieving entries with user \'{user_id}\' and name \'{name}\': {e}')
-            return [None]
+            return []
 
     # Returns a list of all entries assigned to the user
-    def get_user_logins(self, user_id: int) -> list[VaultEntry] | list[None]:
+    def get_user_logins(self, user_id: int) -> list[VaultEntry]:
         try:
             _ = self.cur.execute('SELECT * FROM vault_entries WHERE user_id = ?', (user_id,))
             logger.info(f'Retrieved all entries from user is \'{user_id}\'')
             rows: list[tuple[int, int, str, str, bytes]] = self.cur.fetchall()
-            if rows:
-                return [VaultEntry(*row) for row in rows]
-            else:
-                return [None]
-        except sqlite3.IntegrityError as e:
+            return [VaultEntry(*row) for row in rows]
+        except sqlite3.Error as e:
             logger.error(f'Error retrieving entries from user \'{user_id}\': {e}')
-            return [None]
+            return []
 
     # Updates username for a user
     def update_username(self, user_id: int, new_username: str) -> InsertStatus:
