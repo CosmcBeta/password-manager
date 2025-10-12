@@ -5,8 +5,8 @@ from dataclasses import dataclass
 class User:
     id: int
     username: str
-    master_hash: str
-    salt: str
+    master_hash: bytes
+    salt: bytes
 
 @dataclass
 class VaultEntry:
@@ -14,4 +14,4 @@ class VaultEntry:
     user_id: int
     service_name: str
     username: str
-    password_encrypted: str
+    password_encrypted: bytes

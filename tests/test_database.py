@@ -1,7 +1,8 @@
-from db.database import DatabaseManager
-from core.enums import InsertStatus
-
 import pytest
+
+from db.database import DatabaseManager
+from util.enums import InsertStatus
+
 
 @pytest.fixture
 def db():

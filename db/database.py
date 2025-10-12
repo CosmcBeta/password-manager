@@ -2,8 +2,8 @@ import logging
 import os
 import sqlite3
 
-from core.enums import InsertStatus
 from core.data_models import User, VaultEntry
+from util.enums import InsertStatus
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -17,6 +17,10 @@ class DatabaseManager:
 
         if not exists:
             self.create_database()
+
+    # Closes the database connection
+    def close(self) -> None:
+        self.conn.close()
 
     # Creates the database
     def create_database(self):
@@ -36,7 +40,7 @@ class DatabaseManager:
         self.conn.commit()
 
     # Adds user
-    def insert_user(self, username: str, master_hash: str, salt: str) -> InsertStatus:
+    def insert_user(self, username: str, master_hash: bytes, salt: bytes) -> InsertStatus:
         try:
             _ = self.cur.execute('INSERT INTO users (username, master_hash, salt) \
                                 VALUES (?, ?, ?)', (username, master_hash, salt))
@@ -51,7 +55,7 @@ class DatabaseManager:
             return InsertStatus.ERROR
 
     # Adds login
-    def insert_login(self, user_id: int, name: str, username: str | None, password: str) -> InsertStatus:
+    def insert_login(self, user_id: int, name: str, username: str | None, password: bytes) -> InsertStatus:
         try:
             _ = self.cur.execute('INSERT INTO vault_entries (user_id, service_name, username, password_encrypted) \
                                 VALUES (?, ?, ?, ?)', (user_id, name, username, password))
@@ -70,7 +74,7 @@ class DatabaseManager:
         try:
             _ = self.cur.execute('SELECT * FROM users WHERE username = (?)', (username,))
             logger.info(f'Retrieved the user \'{username}\' successfully')
-            row: tuple[int, str, str, str] | None = self.cur.fetchone()
+            row: tuple[int, str, bytes, bytes] | None = self.cur.fetchone()
             if row:
                 return User(*row)
             return None
@@ -84,7 +88,7 @@ class DatabaseManager:
         try:
             _ = self.cur.execute('SELECT * FROM vault_entries WHERE user_id = ? AND service_name = ?', (user_id, name))
             logger.info(f'Retrieved all entries where name is \'{name}\'')
-            rows: list[tuple[int, int, str, str, str]] = self.cur.fetchall()
+            rows: list[tuple[int, int, str, str, bytes]] = self.cur.fetchall()
             if rows:
                 return [VaultEntry(*row) for row in rows]
             else:
@@ -99,7 +103,7 @@ class DatabaseManager:
         try:
             _ = self.cur.execute('SELECT * FROM vault_entries WHERE user_id = ?', (user_id,))
             logger.info(f'Retrieved all entries from user is \'{user_id}\'')
-            rows: list[tuple[int, int, str, str, str]] = self.cur.fetchall()
+            rows: list[tuple[int, int, str, str, bytes]] = self.cur.fetchall()
             if rows:
                 return [VaultEntry(*row) for row in rows]
             else:
@@ -107,3 +111,16 @@ class DatabaseManager:
         except sqlite3.IntegrityError as e:
             logger.error(f'Error retrieving entries from user \'{user_id}\': {e}')
             return [None]
+
+    # Updates username for a user
+    def update_username(self, user_id: int, new_username: str) -> InsertStatus:
+        try:
+            _ = self.cur.execute('UPDATE users SET username = ? \
+                                WHERE id = ?', (new_username, user_id))
+            self.conn.commit()
+            logger.info(f'Updated username to \'{new_username}\' for user_id {user_id}')
+            return InsertStatus.SUCCESS
+        except sqlite3.IntegrityError as e:
+            logger.error(f'Error updating username for user_id {user_id}: {e}')
+            self.conn.rollback()
+            return InsertStatus.ERROR
