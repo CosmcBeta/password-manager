@@ -20,7 +20,7 @@ class EncryptionManager:
     def decrypt_password(self, key: bytes, encrypted_password: bytes) -> bytes:
         key_b64 = base64.urlsafe_b64encode(key)
         f = Fernet(key_b64)
-        return f.decrypt(encrypted_password.decode())
+        return f.decrypt(encrypted_password)
 
     # Returns just the key/hash for the password and salt given
     def derive_key(self, password: str, salt: bytes) -> bytes:
